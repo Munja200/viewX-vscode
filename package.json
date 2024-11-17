@@ -1,212 +1,213 @@
 {
-  "name": "viewx",
-  "displayName": "viewX",
-  "description": "Extension for visualizing code/model structure of DSL written using textX.",
-  "version": "0.2.1",
-  "homepage": "https://github.com/danielkupco/viewX-vscode",
-  "icon": "images/vx.png",
-  "galleryBanner": {
-    "theme": "dark",
-    "color": "#333333"
-  },
-  "author": {
-    "name": "Daniel Kupco",
-    "email": "kupcodanex@outlook.com",
-    "url": "https://github.com/danielkupco"
-  },
-  "publisher": "dkupco",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/danielkupco/viewX-vscode"
-  },
-  "bugs": {
-    "url": "https://github.com/danielkupco/viewX-vscode/issues"
-  },
-  "badges": [
-    {
-      "href": "https://img.shields.io/badge/vscode--textX--community-textX_tools-blue.svg?logo=github",
-      "url": "https://github.com/textX-tools",
-      "description": "Github development community for textX tools."
-    }
-  ],
-  "engines": {
-    "vscode": "^1.12.0"
-  },
-  "categories": [
-    "Languages", "Other"
-  ],  
-  "keywords": [
-    "viewX",
-    "textX",
-    "DSL",
-    "visualization",
-    "VSCode"
-  ],
-  "activationEvents": [
-    "onLanguage:viewX",
-    "workspaceContains:vxconfig.json",
-    "onCommand:viewx.initProject"
-  ],
-  "main": "./out/src/extension",
-  "contributes": {
-    "configuration": {
-      "type": "object",
-      "title": "viewXConfig",
-      "properties": {
-        "viewX.envVariableName": {
-          "type": "string",
-          "default": "viewXVEnv",
-          "description": "Name of the environment variable which holds path to the viewX python virtual environment."
-        },
-        "viewX.canPreviewActiveDocument": {
-          "type": "boolean",
-          "default": false,
-          "description": "If active document can be previewed. Defined by file extension and viewX model within loaded workspace."
-        },
-        "viewX.previewServer.isWatchConfiguration": {
-          "type": "boolean",
-          "default": true,
-          "description": "Controls whether resume the Web Server or not, when change settings."
-        },
-        "viewX.previewServer.port": {
-          "type": [
-            "number",
-            "null"
-          ],
-          "default": 3000,
-          "description": "Port number of the WebSync server."
-        },
-        "viewX.previewServer.proxy": {
-          "type": "string",
-          "default": "",
-          "description": "Wrap your vhost with a proxy URL to view your site."
-        },
-        "viewX.previewServer.sync": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether synchronized or not."
-        },
-        "viewX.socketServer.port": {
-          "type": [
-            "number",
-            "null"
-          ],
-          "default": 4000,
-          "description": "Port number of the socket.io server."
-        },
-        "viewX.socketServer.debugMode": {
-          "type": "boolean",
-          "default": true,
-          "description": "Debug mode for socket.io server."
-        }
-      }
-    },
-    "commands": [
-      {
-        "command": "viewx.initProject",
-        "title": "viewX: Initialize project"
-      },
-      {
-        "command": "viewx.previewModel",
-        "title": "viewX: Preview model on side panel"
-      },
-      {
-        "command": "viewx.previewBrowser",
-        "title": "viewX: Launch preview on default browser"
-      },
-      {
-        "command": "viewx.stopServer",
-        "title": "viewX: Stop the web server"
-      },
-      {
-        "command": "viewx.resumeServer",
-        "title": "viewX: Resume the web server"
-      },
-      {
-        "command": "viewx.fitDefinition",
-        "title": "viewX: Fit definition on graph"
-      },
-      {
-        "command": "viewx.showUsedPorts",
-        "title": "viewX: Show used ports by this viewX extension instance"
-      },
-      {
-        "command": "viewx.generateSocketDebugger",
-        "title": "viewX: Generate socket debugger HTML page"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "viewx.initProject",
-        "key": "ctrl+alt+v i"
-      },
-      {
-        "command": "viewx.previewModel",
-        "key": "ctrl+alt+v p"
-      },
-      {
-        "command": "viewx.previewBrowser",
-        "key": "ctrl+alt+v b"
-      },
-      {
-        "command": "viewx.stopServer",
-        "key": "ctrl+alt+v s"
-      },
-      {
-        "command": "viewx.resumeServer",
-        "key": "ctrl+alt+v r"
-      },
-      {
-        "command": "viewx.fitDefinition",
-        "key": "ctrl+alt+v f"
-      },
-      {
-        "command": "viewx.showUsedPorts",
-        "key": "ctrl+alt+v u"
-      },
-      {
-        "command": "viewx.generateSocketDebugger",
-        "key": "ctrl+alt+v d"
-      }
-    ],
-    "menus": {
-      "explorer/context": [
-        {
-          "command": "viewx.initProject",
-          "group": "group@1",
-          "when": "explorerResourceIsFolder"
-        }
-      ],
-      "editor/title": [
-        {
-          "command": "viewx.previewModel",
-          "group": "group@2",
-          "when": "config.viewX.canPreviewActiveDocument"
-        },
-        {
-          "command": "viewx.generateSocketDebugger",
-          "group": "group@3"
-        }
-      ],
-      "editor/context": [
-        {
-          "command": "viewx.previewModel",
-          "group": "group@2",
-          "when": "config.viewX.canPreviewActiveDocument"
-        },
-        {
-          "command": "viewx.fitDefinition",
-          "group": "group@2",
-          "when": "config.viewX.canPreviewActiveDocument && editorTextFocus"
-        },
-        {
-          "command": "viewx.generateSocketDebugger",
-          "group": "group@3"
-        }
-      ]
-    },
-    "languages": [
+	"name": "viewx",
+	"displayName": "viewX",
+	"description": "Extension for visualizing code/model structure of DSL written using textX.",
+	"version": "0.2.1",
+	"homepage": "https://github.com/danielkupco/viewX-vscode",
+	"icon": "images/vx.png",
+	"galleryBanner": {
+		"theme": "dark",
+		"color": "#333333"
+	},
+	"author": {
+		"name": "Daniel Kupco",
+		"email": "kupcodanex@outlook.com",
+		"url": "https://github.com/danielkupco"
+	},
+	"publisher": "dkupco",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/danielkupco/viewX-vscode"
+	},
+	"bugs": {
+		"url": "https://github.com/danielkupco/viewX-vscode/issues"
+	},
+	"badges": [
+		{
+			"href": "https://img.shields.io/badge/vscode--textX--community-textX_tools-blue.svg?logo=github",
+			"url": "https://github.com/textX-tools",
+			"description": "Github development community for textX tools."
+		}
+	],
+	"engines": {
+		"vscode": "^1.12.0"
+	},
+	"categories": [
+		"Languages",
+		"Other"
+	],
+	"keywords": [
+		"viewX",
+		"textX",
+		"DSL",
+		"visualization",
+		"VSCode"
+	],
+	"activationEvents": [
+		"onLanguage:viewX",
+		"workspaceContains:vxconfig.json",
+		"onCommand:viewx.initProject"
+	],
+	"main": "./out/src/extension",
+	"contributes": {
+		"configuration": {
+			"type": "object",
+			"title": "viewXConfig",
+			"properties": {
+				"viewX.envVariableName": {
+					"type": "string",
+					"default": "viewXVEnv",
+					"description": "Name of the environment variable which holds path to the viewX python virtual environment."
+				},
+				"viewX.canPreviewActiveDocument": {
+					"type": "boolean",
+					"default": false,
+					"description": "If active document can be previewed. Defined by file extension and viewX model within loaded workspace."
+				},
+				"viewX.previewServer.isWatchConfiguration": {
+					"type": "boolean",
+					"default": true,
+					"description": "Controls whether resume the Web Server or not, when change settings."
+				},
+				"viewX.previewServer.port": {
+					"type": [
+						"number",
+						"null"
+					],
+					"default": 3000,
+					"description": "Port number of the WebSync server."
+				},
+				"viewX.previewServer.proxy": {
+					"type": "string",
+					"default": "",
+					"description": "Wrap your vhost with a proxy URL to view your site."
+				},
+				"viewX.previewServer.sync": {
+					"type": "boolean",
+					"default": true,
+					"description": "Whether synchronized or not."
+				},
+				"viewX.socketServer.port": {
+					"type": [
+						"number",
+						"null"
+					],
+					"default": 4000,
+					"description": "Port number of the socket.io server."
+				},
+				"viewX.socketServer.debugMode": {
+					"type": "boolean",
+					"default": true,
+					"description": "Debug mode for socket.io server."
+				}
+			}
+		},
+		"commands": [
+			{
+				"command": "viewx.initProject",
+				"title": "viewX: Initialize project"
+			},
+			{
+				"command": "viewx.previewModel",
+				"title": "viewX: Preview model on side panel"
+			},
+			{
+				"command": "viewx.previewBrowser",
+				"title": "viewX: Launch preview on default browser"
+			},
+			{
+				"command": "viewx.stopServer",
+				"title": "viewX: Stop the web server"
+			},
+			{
+				"command": "viewx.resumeServer",
+				"title": "viewX: Resume the web server"
+			},
+			{
+				"command": "viewx.fitDefinition",
+				"title": "viewX: Fit definition on graph"
+			},
+			{
+				"command": "viewx.showUsedPorts",
+				"title": "viewX: Show used ports by this viewX extension instance"
+			},
+			{
+				"command": "viewx.generateSocketDebugger",
+				"title": "viewX: Generate socket debugger HTML page"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "viewx.initProject",
+				"key": "ctrl+alt+v i"
+			},
+			{
+				"command": "viewx.previewModel",
+				"key": "ctrl+alt+v p"
+			},
+			{
+				"command": "viewx.previewBrowser",
+				"key": "ctrl+alt+v b"
+			},
+			{
+				"command": "viewx.stopServer",
+				"key": "ctrl+alt+v s"
+			},
+			{
+				"command": "viewx.resumeServer",
+				"key": "ctrl+alt+v r"
+			},
+			{
+				"command": "viewx.fitDefinition",
+				"key": "ctrl+alt+v f"
+			},
+			{
+				"command": "viewx.showUsedPorts",
+				"key": "ctrl+alt+v u"
+			},
+			{
+				"command": "viewx.generateSocketDebugger",
+				"key": "ctrl+alt+v d"
+			}
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "viewx.initProject",
+					"group": "group@1",
+					"when": "explorerResourceIsFolder"
+				}
+			],
+			"editor/title": [
+				{
+					"command": "viewx.previewModel",
+					"group": "group@2",
+					"when": "config.viewX.canPreviewActiveDocument"
+				},
+				{
+					"command": "viewx.generateSocketDebugger",
+					"group": "group@3"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "viewx.previewModel",
+					"group": "group@2",
+					"when": "config.viewX.canPreviewActiveDocument"
+				},
+				{
+					"command": "viewx.fitDefinition",
+					"group": "group@2",
+					"when": "config.viewX.canPreviewActiveDocument && editorTextFocus"
+				},
+				{
+					"command": "viewx.generateSocketDebugger",
+					"group": "group@3"
+				}
+			]
+		},
+		"languages": [
 			{
 				"id": "textx",
 				"aliases": [
@@ -228,33 +229,46 @@
 				]
 			}
 		]
-  },
-  "scripts": {
-    "vscode:prepublish": "tsc -p ./ --allowJs && cpx \"src/**/*.{py,template,html}\" out",
-    "compile": "tsc -watch -p ./ --allowJs && cpx \"src/**/*.{py,template,html}\" out --watch",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "node ./node_modules/vscode/bin/test"
-  },
-  "dependencies": {
-    "browser-sync": "^2.18.13",
-    "cors": "^2.8.4",
-    "express": "^4.15.4",
-    "python-shell": "^0.4.0",
-    "load-json-file": "^3.0.0",
-    "socket.io": "^2.0.3",
-    "portscanner": "^2.1.1",
-    "typescript": "^2.5.3",
-    "vscode": "^1.1.5"
-  },
-  "devDependencies": {
-    "@types/browser-sync": "^0.0.36",
-    "@types/express": "^4.0.37",
-    "@types/mocha": "^2.2.42",
-    "@types/node": "^8.0.24",
-    "cpx": "^1.5.0",
-    "mocha": "^3.5.0",
-    "tslint": "^5.7.0",
-    "typescript": "^2.5.3",
-    "vscode": "^1.1.5"
-  }
+	},
+	"scripts": {
+		"vscode:prepublish": "tsc -p ./ --allowJs && cpx \"src/**/*.{py,template,html}\" out",
+		"compile": "tsc -watch -p ./ --allowJs && cpx \"src/**/*.{py,template,html}\" out --watch",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test": "node ./node_modules/vscode/bin/test"
+	},
+	"dependencies": {
+		"browser-sync": "^2.18.13",
+		"cors": "^2.8.4",
+		"express": "^4.15.4",
+		"load-json-file": "^3.0.0",
+		"portscanner": "^2.1.1",
+		"python-shell": "^0.4.0",
+		"socket.io": "^2.0.3",
+		"socket.io-client": "^2.5.0"
+	},
+	"devDependencies": {
+		"@types/browser-sync": "^0.0.36",
+		"@types/express": "^4.0.37",
+		"@types/jest": "^29.5.14",
+		"@types/mocha": "^10.0.9",
+		"@types/node": "^8.10.66",
+		"cpx": "^1.5.0",
+		"mocha": "^3.5.0",
+		"tslint": "^5.7.0",
+		"typescript": "^5.6.2",
+		"vscode": "^1.1.5"
+	},
+	"__metadata": {
+		"id": "6093629f-bf24-4018-b59f-c9b1ccf5511a",
+		"publisherId": "4d0318cb-98fb-4085-a46b-cf5b4a5b1560",
+		"publisherDisplayName": "Daniel Kupco",
+		"targetPlatform": "undefined",
+		"isApplicationScoped": false,
+		"isPreReleaseVersion": false,
+		"hasPreReleaseVersion": false,
+		"installedTimestamp": 1726510048976,
+		"pinned": false,
+		"preRelease": false,
+		"source": "gallery"
+	}
 }

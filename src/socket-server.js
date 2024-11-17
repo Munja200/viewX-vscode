@@ -32,6 +32,22 @@ function startSocketServer(projectDirectory, port) {
         console.log("connection...");
         // console.log(socket);
 
+
+        socket.on('select-element', function (data) {
+            const offset = data.offset;
+            const offsetEnd = data.offset_end
+
+            io.to('extension').emit('select-element1',{ offset: offset, offset_end: offsetEnd });
+        });
+
+        socket.on('select-element-delete', function (data) {   
+            const offset = data.offset;
+            const offsetEnd = data.offset_end;
+
+            io.to('extension').emit('select-element-delete',{ offset: offset, offset_end: offsetEnd });
+        });
+
+
         // distribute sockets to rooms
         socket.on('ext-room', function(debug) {
             socket.join('extension');
@@ -64,6 +80,14 @@ function startSocketServer(projectDirectory, port) {
             if(debugMode) {
                 io.to('logroom').emit('chat message', 'preview sending command ' + command + ' to extension');
             }
+        });
+        
+        socket.on('connect_error', (error) => {
+            console.error('Connection failed:', error);
+        });
+        
+        socket.on('error', (err) => {
+            console.error('Socket error on server:', err);
         });
 
         if(debugMode) {

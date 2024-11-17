@@ -71,3 +71,11 @@ IntWrapper:
 FloatWrapper:
     FLOAT
 ;
+
+ShapePolygonPoints:
+    'shape-polygon-points' ':' points+=Points[',']
+;
+
+Points:
+    x=FLOAT y=FLOAT 
+;

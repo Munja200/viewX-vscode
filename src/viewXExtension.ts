@@ -27,6 +27,7 @@ export class ViewXExtension {
     public activeViewXModel: string;
     public lastPreviewedFileUri: vscode.Uri;
     public isPreviewActive: boolean;
+    public pythonPath : vscode.Uri; 
 
     constructor(context: vscode.ExtensionContext, disposables: vscode.Disposable[]) {
         this.extensionConfig = vscode.workspace.getConfiguration("viewX");
@@ -36,6 +37,10 @@ export class ViewXExtension {
         this.viewXVEnvPath = process.env[this.extensionConfig.get("envVariableName") as string];
         this.disposables = disposables;
         this.previewFileName = previewFileName;
+        this.pythonPath = vscode.Uri.file(`${this.viewXVEnvPath}/Scripts/python`);
+        if(process.platform ==='linux'){
+            this.pythonPath = vscode.Uri.file(`${this.viewXVEnvPath}/bin/python`);
+        }
 
         // if workspace is loaded, read viewX project configuration file
         this.workspacePath = vscode.workspace.rootPath;
@@ -69,7 +74,6 @@ export class ViewXExtension {
     }
 
     public generatePreviewHtmlForModelAsync(modelUri: vscode.Uri, callback?: Function) {
-        let envPythonUri: vscode.Uri = vscode.Uri.file(`${this.viewXVEnvPath}/python`);
         let workspacePath: string = vscode.workspace.rootPath;
         let pyScriptUri: vscode.Uri = vscode.Uri.file(`${this.extensionPath}/out/python`);
         let scriptName: string = "viewx_interpreter.py";
@@ -78,7 +82,7 @@ export class ViewXExtension {
         let vxPath: vscode.Uri = vscode.Uri.file(`${workspacePath}/${vxProjDirName}`);
         let options = {
             mode: "text",
-            pythonPath: envPythonUri.fsPath,
+            pythonPath: this.pythonPath.fsPath,
             // pythonOptions: ["-u"],
             // need to explicitly specify script path to be cross-platform functional
             scriptPath: pyScriptUri.fsPath,
@@ -141,14 +145,38 @@ export class ViewXExtension {
             viewColumn = 1;
         }
         let fileToPreview: vscode.Uri = vscode.window.activeTextEditor.document.uri;
-        // finally get URI of the preview file (hosted on web server) and show it
-        const previewUri = Utility.getUriOfPreviewHtml(this.viewXProjectConfig);
-        vscode.commands.executeCommand("vscode.previewHtml", previewUri, viewColumn, `${Utility.getFileNameFromFileUriPath(fileToPreview.path)} - viewX Preview`).then(() => {
+     // finally get URI of the preview file (hosted on web server) and show it
+     const previewUri = Utility.getUriOfPreviewHtml(this.viewXProjectConfig)
+
+     const fs = require('fs');
+     const path = require('path');
+     const folderPath = path.join(path.dirname(fileToPreview.path), `${vxProjDirName}`);
+
+     let fullPath = path.join(folderPath, previewUri.fsPath);
+     const htmlContent = fs.readFileSync("/vxproj/preview.html", 'utf8');
+   
+     const panel = vscode.window.createWebviewPanel('htmlPreview', 'HTML Preview', vscode.ViewColumn.One,{ enableScripts: true});
+
+     panel.webview.html = panel.webview.html = `
+        <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>ViewX Preview</title>
+            </head>
+            <body>
+                <iframe src="http://localhost:3000/preview.html" style="width:100%; height:100%; border:none;"></iframe>
+            </body>
+        </html>`;
+
+        panel.onDidDispose(() => {
             this.isPreviewActive = true;
             if (callback) {
                 callback();
             }
-        }, (reason) => {
+        }, null, this.disposables);
+     
+        panel.onDidDispose(() => {},(reason) => {
             vscode.window.showErrorMessage(reason);
         });
     }

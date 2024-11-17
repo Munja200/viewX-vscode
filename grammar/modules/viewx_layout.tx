@@ -1,0 +1,179 @@
+import viewx_common
+
+Layout:
+    'layout' '{' model=LayoutType '}'
+;
+
+LayoutType:
+    Random | Grid | Circle | Concentric2 | Breadthfirst | Cose | Preset
+;
+
+Random:
+    'name' ':' name='random'
+    properties*=RandomProperty
+;
+
+Grid:
+    'name' ':' name='grid'
+    properties*=GridProperty
+;
+
+Circle:
+    'name' ':' name='circle'
+    properties*=CircleProperty
+;
+
+Concentric2:
+    'name' ':' name='concentric'
+    properties*=ConcentricProperty
+;
+
+Breadthfirst:
+    'name' ':' name='breadthfirst'
+    properties*=BreadthfirstProperty
+;
+
+Cose:
+    'name' ':' name='cose'
+    properties*=CoseProperty
+;
+
+Preset:
+    'name' ':' name='preset'
+    properties*=PresetProperty
+;
+
+RandomProperty:
+    BoundingBox | Animate | AnimationDuration | Fit | PaddingProperty
+;
+
+GridProperty:
+    Rows | Cols | Position | Animate | AnimationDuration | Fit | PaddingProperty | AvoidOverlap | Condense
+;
+
+CircleProperty:
+    Radius | StartAngle | Sweep | Animate | Fit | PaddingProperty
+;
+
+ConcentricProperty:
+    MinNodeSpacing | Concentric | LevelWidth | Animate | Fit | PaddingProperty
+;
+
+BreadthfirstProperty:
+    SpacingFactor | Animate | Fit | PaddingProperty | AvoidOverlap
+;
+
+CoseProperty:
+    IdealEdgeLength | NodeOverlap | Refresh | Animate | Fit | PaddingProperty | NodeRepulsion | EdgeElasticity | NestingFactor | Gravity | NumIter
+;
+
+PresetProperty:
+    Position | Animate | Fit | PaddingProperty
+;
+
+//Property
+BoundingBox:
+    'boundingBox' ':' point1=Points ',' point2= Points
+;
+
+Animate:
+    'animate' ':' value=BOOL
+;
+
+AnimationDuration:
+    'animationDuration' ':' value=INT
+;
+
+Fit:
+    'fit' ':' value=BOOL
+;
+
+Rows:
+    'rows' ':' value=INT
+;
+
+Cols:
+    'cols' ':' value=INT
+;
+
+Position:
+    'position' ':' value=PropertyPosition 'end'  'position'
+;
+
+PropertyPosition[noskipws]:
+    /(.|\n)*?(?=\s*end\s*position)/
+;
+
+
+AvoidOverlap:
+    'avoidOverlap' ':' value=BOOL
+;
+
+Condense:
+    'condense' ':' value=BOOL
+;
+
+Radius:
+    'radius' ':'  value=INT
+;
+
+StartAngle:
+    'startAngle' ':' value=FLOAT
+;
+
+Sweep:
+    'sweep' ':' value=FLOAT
+;
+
+MinNodeSpacing:
+    'minNodeSpacing' ':' value=INT
+;
+
+Concentric:
+    'concentric' ':' value=PropertyConcentric 'end'  'concentric'
+;
+
+
+PropertyConcentric[noskipws]:
+    /(.|\n)*?(?=\s*end\s*concentric)/
+;
+
+LevelWidth:
+    'levelWidth' ':' value=INT
+;
+
+SpacingFactor:
+    'spacingFactor' ':' value=FLOAT
+;
+
+IdealEdgeLength:
+    'idealEdgeLength' ':' value=FLOAT
+;
+
+NodeOverlap:
+    'nodeOverlap' ':' value=BOOL
+;
+
+Refresh:
+    'refresh' ':' value=BOOL
+;
+
+NodeRepulsion:
+    'nodeRepulsion' ':' value=FLOAT
+;
+
+EdgeElasticity:
+    'edgeElasticity' ':' value=FLOAT
+;
+
+NestingFactor:
+    'nestingFactor' ':' value=INT
+;
+
+Gravity:
+    'gravity' ':' value=FLOAT
+;
+
+NumIter:
+    'numIter' ':' value=INT
+;
