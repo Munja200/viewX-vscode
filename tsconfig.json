@@ -8,7 +8,9 @@
         ],
         "sourceMap": true,
         "rootDir": ".",
-        "allowJs": true
+        "allowJs": true,
+        "types": ["mocha"]
+
     },
     "files": [
         "node_modules/typescript/lib/lib.es6.d.ts"

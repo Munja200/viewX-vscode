@@ -1,12 +1,14 @@
 import modules.viewx_common
 import modules.viewx_label
 import modules.viewx_link
+import modules.viewx_layout
 
 ViewXModel:
     tx_import=Import
     // support wildcard * and separator ;
     (apply_to=ApplyTo)?
     (stylesheet=Stylesheet)?
+    (layout=Layout)?
     views+=ClassView
 ;
 
@@ -52,7 +54,7 @@ ViewProperty:
 ;
 
 ShapeProperty:
-    WidthProperty | HeightProperty | BackgroundProperty | LineProperty | BorderProperty | PaddingProperty
+    WidthProperty | HeightProperty | BackgroundProperty | LineProperty | BorderProperty | PaddingProperty | ShapePolygonPoints
 ;
 
 Label:

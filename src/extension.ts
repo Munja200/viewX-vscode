@@ -11,9 +11,9 @@ import { Utility } from "./utility";
 // import viewX configuration module
 import { ViewXExtension } from "./viewXExtension"
 // import socket.io client (must be imported like this in typescript)
-import * as io from "socket.io-client"
+import io from "socket.io-client"
 // import socket server (communication proxy)
-import * as socketserver from "./socket-server"
+const socketserver = require('./socket-server');
 
 // expose global variables
 let viewXExtension: ViewXExtension;
@@ -31,6 +31,12 @@ export function activate(context: vscode.ExtensionContext) {
     viewXExtension = new ViewXExtension(context, disposables);
 
     startSocketServer(disposables);
+
+    let pythonPath : string = vscode.Uri.file(`${viewXExtension.viewXVEnvPath}/Scripts/python`).fsPath;
+                    
+    if(process.platform ==='linux'){
+        pythonPath = vscode.Uri.file(`${viewXExtension.viewXVEnvPath}/bin/python`).fsPath 
+    }
 
     // When configuration is changed, resume web server.
     vscode.workspace.onDidChangeConfiguration(() => {
@@ -101,12 +107,12 @@ export function activate(context: vscode.ExtensionContext) {
                 if (result !== undefined) {
                     let projectName: string = result;
                     let projectFolder: vscode.Uri = vscode.Uri.file(`${projectPath}/${projectName}`);
-
                     let pyScriptUri: vscode.Uri = vscode.Uri.file(`${viewXExtension.extensionPath}/out/python`);
                     let scriptName: string = "viewx_init_project.py";
+                     
                     let options = {
-                        mode: "text",
-                        pythonPath: vscode.Uri.file(`${viewXExtension.viewXVEnvPath}/python`).fsPath,
+                        mode: "text",       
+                        pythonPath: pythonPath,
                         // pythonOptions: ["-u"],
                         // need to explicitly specify script path to be cross-platform functional
                         scriptPath: pyScriptUri.fsPath,
@@ -183,7 +189,7 @@ export function activate(context: vscode.ExtensionContext) {
         let scriptName: string = "socket_debugger_generator.py";
         let options = {
             mode: "text",
-            pythonPath: vscode.Uri.file(`${viewXExtension.viewXVEnvPath}/python`).fsPath,
+            pythonPath: pythonPath,
             // pythonOptions: ["-u"],
             // need to explicitly specify script path to be cross-platform functional
             scriptPath: pyScriptUri.fsPath,
@@ -246,21 +252,103 @@ function startSocketServer(disposables: vscode.Disposable[]) {
         console.log("connecting to socket server: " + `http://localhost:${activeSocketPort}`);
 
         // when port is determined for the socket server, we can connect to it and bind to an event
-        socket = io(`http://localhost:${activeSocketPort}`);
-        socket.emit("ext-room", viewXExtension.socketServerConfig.get("debugMode") as boolean);
-        socket.on("ext-receive-command", function(command) {
+        socket = io(`http://localhost:${viewXExtension.viewXProjectConfig.project.socketPort}`);
+        console.log("Ovo je than funkcija i socket1223 je :",socket, socket.connected)
+        socket.on('connect_error', (error) => {
+            console.error("Socket113 connection error:", error);
+        });
+        const debugMode = viewXExtension.socketServerConfig.get("debugMode");
+        socket.emit("ext-room", debugMode);
+
+        
+        socket.on("ext-receive-command", function (command) {
             viewXExtension.interpretCommand(command);
         });
+        socket.on('select-element-delete', function (data) {
+        
+            deleteTextFromOffsets(data.offset,data.offset_end);
+            console.log("Primljeni su podaci is delete ja ovde sad primam i sve", data)
+    
+        });
 
+        socket.on('select-element1', function (data) {
+
+            selectTextAtOffset(data.offset,data.offset_end);
+            console.log("Primljeni su podaci is extension1 ja ovde sad primam i sve", data)
+    
+        });
+      
         // register command to push message to the socket server
-        disposables.push(vscode.commands.registerCommand("viewx.fitDefinition", () => {
-            let cursorPosition = vscode.window.activeTextEditor.selection.start;
-            let lineBeginning = new vscode.Position(cursorPosition.line, 0);
-            let offset = vscode.window.activeTextEditor.document.offsetAt(lineBeginning);
-            socket.emit("ext-send-command", `fit|offset=${offset}`);
-        }));
-
-    }).catch(function(error) {
+       
+    }).catch(function (error) {
         console.log("Failed to start socket server: " + error);
     });
+}
+
+function selectTextAtOffset(startOffset, endOffset) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        vscode.window.showErrorMessage("Nema otvorenog editora.");
+        return;
+    }
+
+    const document = editor.document;
+    
+    // Pretvori offset u poziciju (linija, kolona)
+    const startPos = document.positionAt(startOffset);
+    const endPos = document.positionAt(endOffset);
+
+    // Napravi selekciju i postavi je
+    const selection = new vscode.Selection(startPos, endPos);
+    editor.selection = selection;
+
+    // Fokusiraj editor (scroll do selekcije)
+    editor.revealRange(new vscode.Range(startPos, endPos));
+}
+
+
+async function deleteTextFromOffsets(offsetStart, offsetEnd) {
+    // Iterate over all open text editors
+    const smEditor1 = vscode.window.visibleTextEditors.find(editor => {
+        return editor.document.fileName.endsWith('.sm'); // Check if file ends with .sm
+    });
+    const smEditor = vscode.window.activeTextEditor;
+
+
+    const document = smEditor.document;
+    console.log("Ovde se sad brise ovaj ofset", offsetStart, "  ", offsetEnd)
+    // Pretvori offset u poziciju (linija, kolona)
+    const startPos = document.positionAt(offsetStart);
+    const endPos = document.positionAt(offsetEnd);
+    const selection = new vscode.Selection(startPos, endPos);
+    smEditor.selection = selection;
+    const editor = smEditor;
+
+
+    if (editor) {
+        // Proveri da li postoji selekcija
+        const selection = editor.selection;
+
+        if (!selection.isEmpty) {
+            // Izvrši brisanje
+            Promise.resolve(
+                editor.edit(editBuilder => {
+                    editBuilder.delete(selection);
+                })
+            ).then(success => {
+                if (success) {
+                    console.log('Text deleted successfully.');
+                } else {
+                    console.log('Failed to delete text.');
+                }
+            }).catch(error => {
+                console.error('Error during edit:', error);
+            });
+        } else {
+            console.log('No text selected to delete.');
+        }
+    } else {
+        console.log('No active text editor found.');
+    }
+    
 }
