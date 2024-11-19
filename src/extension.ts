@@ -11,7 +11,7 @@ import { Utility } from "./utility";
 // import viewX configuration module
 import { ViewXExtension } from "./viewXExtension"
 // import socket.io client (must be imported like this in typescript)
-import io from "socket.io-client"
+import * as socketIOClient from 'socket.io-client';
 // import socket server (communication proxy)
 const socketserver = require('./socket-server');
 
@@ -252,7 +252,7 @@ function startSocketServer(disposables: vscode.Disposable[]) {
         console.log("connecting to socket server: " + `http://localhost:${activeSocketPort}`);
 
         // when port is determined for the socket server, we can connect to it and bind to an event
-        socket = io(`http://localhost:${viewXExtension.viewXProjectConfig.project.socketPort}`);
+        socket = socketIOClient(`http://localhost:${viewXExtension.viewXProjectConfig.project.socketPort}`);
         console.log("Ovo je than funkcija i socket1223 je :",socket, socket.connected)
         socket.on('connect_error', (error) => {
             console.error("Socket113 connection error:", error);
@@ -274,7 +274,6 @@ function startSocketServer(disposables: vscode.Disposable[]) {
         socket.on('select-element1', function (data) {
 
             selectTextAtOffset(data.offset,data.offset_end);
-            console.log("Primljeni su podaci is extension1 ja ovde sad primam i sve", data)
     
         });
       
