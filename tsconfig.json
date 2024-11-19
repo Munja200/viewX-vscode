@@ -1,15 +1,18 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es6",
+        "target": "ES2018",
         "outDir": "out",
         "lib": [
-            "es6"
+            "ES2018", "DOM"
         ],
         "sourceMap": true,
         "rootDir": ".",
         "allowJs": true,
-        "types": ["mocha"]
+        "types": ["mocha","vscode"],
+        "typeRoots": [
+            "node_modules/@types"
+        ],        "skipLibCheck": true
 
     },
     "files": [
