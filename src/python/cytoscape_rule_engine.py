@@ -1,7 +1,7 @@
 from cytoscape_helper import ViewStyle
 
 node_shapes = ('ellipse', 'triangle', 'rectangle', 'roundrectangle', 'cutrectangle', 'bottomroundrectangle', 'barrel',
-               'rhomboid', 'diamond', 'pentagon', 'hexagon', 'concavehexagon', 'heptagon', 'octagon', 'star', 'vee')
+               'rhomboid', 'diamond', 'pentagon', 'hexagon', 'concavehexagon', 'heptagon', 'octagon', 'star', 'vee', 'polygon')
 node_background = ('background-color', 'background-blacken', 'background-opacity')
 node_border = ('border-width', 'border-style', 'border-color', 'border-opacity')
 node_border_style = ('solid', 'dotted', 'dashed', 'double')
@@ -17,11 +17,19 @@ class PropertyVisitor(object):
     """
     def __init__(self):
         self.view_style = None
+        self.layout = []
         self.switch_visit = {}
 
     def visit(self, _property, key=None):
         visit = self.switch_visit.get(key if key else _property.__class__.__name__, self.visit_default)
         visit(_property)
+
+    def visit_shape_polygon(self, _property):
+        string = "";
+        for point in _property.points:
+            string += str(point.x) + ' ' + str(point.y) + ', '
+        string = string[:-1]
+        self.view_style.style['shape-polygon-points'] = string
 
     def visit_width(self, _property):
         if _property.width:
@@ -123,6 +131,106 @@ class PropertyVisitor(object):
     def visit_default(self, _property):
         pass
 
+    def visit_bounding_box(self, _property):
+        if _property.point1.x <= _property.point2.x and _property.point1.y <= _property.point1.y:
+            self.layout.append('boundingBox : { x1: ' + str(_property.point1.x) + ', y1: '+ str( _property.point1.y) +
+                           ', x2: '+str(_property.point2.x) + ', y2: '+ str( _property.point2.y)+ ' }')
+
+    def visit_animate(self, _property):
+        if _property.value:
+            self.layout.append('animate : ' + str(_property.value).lower())
+
+    def visit_animation_duration(self, _property):
+        if _property.value >=0:
+            self.layout.append('animationDuration : ' + str(_property.value))
+
+    def visit_fit(self, _property):
+        if _property.value:
+            self.layout.append('fit : ' + str(_property.value).lower())
+
+    def visit_padding_layout(self, _property):
+        if _property.padding:
+            self.layout.append('padding : ' + str(_property.padding))
+
+    def visit_rows(self, _property):
+        if _property.value >= 0:
+            self.layout.append('rows : ' + str(_property.value))
+
+    def visit_cols(self, _property):
+        if _property.value >= 0:
+            self.layout.append('cols : ' + str(_property.value))
+
+    def visit_position(self, _property):
+        if _property.value:
+            self.layout.append('position : ' + _property.value)
+
+    def visit_avoid_overlap(self, _property):
+        if _property.value:
+            self.layout.append('avoidOverlap : ' + str(_property.value).lower())
+
+    def visit_condense(self, _property):
+        if _property.value:
+            self.layout.append('condense : ' + str(_property.value).lower())
+
+    def visit_radius(self, _property):
+        if _property.value:
+            self.layout.append('radius : ' + str(_property.value))
+
+    def visit_start_angle(self, _property):
+        if _property.value:
+            self.layout.append('startAngle : ' + str(_property.value))
+
+    def visit_sweep(self, _property):
+        if _property.value:
+            self.layout.append('sweep : ' + str(_property.value))
+
+    def visit_min_node_spacing(self, _property):
+        if _property.value:
+            self.layout.append('minNodeSpacing : ' + str(_property.value))
+
+    def visit_concentric(self, _property):
+        if _property.value:
+            self.layout.append('concentric : ' + _property.value)
+
+    def visit_level_width(self, _property):
+        if _property.value:
+            self.layout.append('levelWidth : ' + str(_property.value))
+
+    def visit_spacing_factor(self, _property):
+        if _property.value:
+            self.layout.append('spacingFactor : ' + str(_property.value))
+
+    def visit_ideal_edge_length(self, _property):
+        if _property.value:
+            self.layout.append('idealEdgeLength : ' + str(_property.value))
+
+    def visit_node_overlap(self, _property):
+        if _property.value:
+            self.layout.append('nodeOverlap : ' + str(_property.value).lower())
+
+    def visit_refresh(self, _property):
+        if _property.value:
+            self.layout.append('refresh : ' + str(_property.value).lower())
+
+    def visit_node_repulsion(self, _property):
+        if _property.value:
+            self.layout.append('nodeRepulsion : ' + str(_property.value))
+
+    def visit_edge_elasticity(self, _property):
+        if _property.value:
+            self.layout.append('edgeElasticity : ' + str(_property.value))
+
+    def visit_nesting_factor(self, _property):
+        if _property.value:
+            self.layout.append('nestingFactor : ' + str(_property.value))
+
+    def visit_gravity(self, _property):
+        if _property.value:
+            self.layout.append('gravity : ' + str(_property.value))
+
+    def visit_num_iter(self, _property):
+        if _property.value:
+            self.layout.append('numIter : ' + str(_property.value))
 
 def create_cp_weights(distances):
     """
@@ -134,6 +242,41 @@ def create_cp_weights(distances):
     length = distances.__len__()
     return [w / (length + 1) for w in range(1, length + 1)]
 
+class LayoutPropertyVisitor(PropertyVisitor):
+
+    def __init__(self, layout):
+        super().__init__()
+
+        self.switch_visit = {
+            'BoundingBox': self.visit_bounding_box,
+            'Animate': self.visit_animate,
+            'AnimationDuration': self.visit_animation_duration,
+            'Fit': self.visit_fit,
+            'PaddingProperty': self.visit_padding_layout,
+            'Rows': self.visit_rows,
+            'Cols': self.visit_cols,
+            'Position': self.visit_position,
+            'AvoidOverlap': self.visit_avoid_overlap,
+            'Condense': self.visit_condense,
+            'Radius': self.visit_radius,
+            'StartAngle': self.visit_start_angle,
+            'Sweep': self.visit_sweep,
+            'MinNodeSpacing': self.visit_min_node_spacing,
+            'Concentric': self.visit_concentric,
+            'LevelWidth': self.visit_level_width,
+            'SpacingFactor': self.visit_spacing_factor,
+            'IdealEdgeLength': self.visit_ideal_edge_length,
+            'NodeOverlap': self.visit_node_overlap,
+            'Refresh': self.visit_refresh,
+            'NodeRepulsion': self.visit_node_repulsion,
+            'EdgeElasticity': self.visit_edge_elasticity,
+            'NestingFactor': self.visit_nesting_factor,
+            'Gravity': self.visit_gravity,
+            'NumIter': self.visit_num_iter
+        }
+
+        for prop in layout.model.properties:
+            self.visit(prop)
 
 class ViewStylePropertyVisitor(PropertyVisitor):
     """
@@ -152,7 +295,8 @@ class ViewStylePropertyVisitor(PropertyVisitor):
             'Label': self.visit_label,
             'EdgeStartProperty': self.visit_edge_property,
             'EdgeEndProperty': self.visit_edge_property,
-            'LinkStyleProperty': self.visit_link_style_property
+            'LinkStyleProperty': self.visit_link_style_property,
+            'ShapePolygonPoints': self.visit_shape_polygon
         }
 
         if view.shape.__class__.__name__ == 'LinkShape':

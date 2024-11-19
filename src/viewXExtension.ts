@@ -148,35 +148,45 @@ export class ViewXExtension {
      // finally get URI of the preview file (hosted on web server) and show it
      const previewUri = Utility.getUriOfPreviewHtml(this.viewXProjectConfig)
 
-     const fs = require('fs');
+   //  const fs = require('fs');
      const path = require('path');
      const folderPath = path.join(path.dirname(fileToPreview.path), `${vxProjDirName}`);
 
-     let fullPath = path.join(folderPath, previewUri.fsPath);
-     const htmlContent = fs.readFileSync("/vxproj/preview.html", 'utf8');
+    // let fullPath = path.join(folderPath, previewUri.fsPath);
    
-     const panel = vscode.window.createWebviewPanel('htmlPreview', 'HTML Preview', vscode.ViewColumn.One,{ enableScripts: true});
-
-     panel.webview.html = panel.webview.html = `
-        <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>ViewX Preview</title>
-            </head>
-            <body>
-                <iframe src="http://localhost:3000/preview.html" style="width:100%; height:100%; border:none;"></iframe>
-            </body>
-        </html>`;
-
+    const panel = vscode.window.createWebviewPanel('htmlPreview', 'HTML Preview', vscode.ViewColumn.One, { enableScripts: true });
+    panel.webview.html = panel.webview.html = `
+   <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViewX Preview</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <iframe src="http://localhost:3000/preview.html"></iframe>
+</body>
+</html>`;
         panel.onDidDispose(() => {
             this.isPreviewActive = true;
             if (callback) {
                 callback();
             }
         }, null, this.disposables);
-     
-        panel.onDidDispose(() => {},(reason) => {
+        panel.onDidDispose(() => { }, (reason) => {
             vscode.window.showErrorMessage(reason);
         });
     }
