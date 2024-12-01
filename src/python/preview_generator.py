@@ -38,6 +38,7 @@ def generate(viewX_interpreter, output_dir, socket_port, model_name, view_model_
                                 'elements': viewX_interpreter.elements.values(),
                                 'styles': viewX_interpreter.styles,
                                 'layout': viewX_interpreter.layout,
+                                'parents': viewX_interpreter.parents,
                                 'overwrite_styles': viewX_interpreter.overwrite_styles})
 
     # Write rendered content to the file

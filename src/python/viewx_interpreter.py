@@ -7,6 +7,11 @@ from textx.model import get_children_of_type
 from textx.exceptions import *
 import cytoscape_helper as cy
 
+class Parent:
+    def __init__(self, id, name, show_childs):
+        self.id = id
+        self.name = name
+        self.show_childs = show_childs 
 
 class ViewXInterpreter(object):
     """
@@ -19,6 +24,7 @@ class ViewXInterpreter(object):
         self.elements = {}  # all Cytoscape.js graph elements
         self.styles = []  # style definitions for elements
         self.layout = []
+        self.parents = []
         self.overwrite_styles = False  # overwrite styles flag
         self.traversed_types = []  # visited types during recursive search algorithm
         self.existing_parents = []  # used when multiple sources reference same element as inside
@@ -208,7 +214,12 @@ class ViewXInterpreter(object):
         if hasattr(view, 'parent_view') and view.parent_view is not None:
             parent = self.find_view_parent_tx_type(item, view, self.model)
             if parent is not None:
-                graph_element.add_data('parent', cy.small_hash(parent))
+                value = cy.small_hash(parent)
+                graph_element.add_data('parent', value)
+                if not any(obj.id == value for obj in self.parents):
+                   self.parents.append(Parent(value,view.parent_view.name, True if view.show =="show" else False  )) 
+                if view.show == "show":
+                    graph_element.add_data('show', True)
 
         # if parent class view is defined
         if hasattr(view, 'container') and view.container:
