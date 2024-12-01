@@ -155,6 +155,13 @@ if [ -d "$PARENT" ]; then
 		sudo echo "#" >> ~/.bashrc
 		sudo echo "# Added by viewX VS Code extension" >> ~/.bashrc
 		sudo echo "export viewXVEnv=$VENV" >> ~/.bashrc
+		if ! grep -q "export viewXVEnv" !/.profile; then
+			echo "export viewXVEnv=$VENV" >> ~/.profile
+			echo "The 'viewXVEnv' variable hass been added to ~/.profile"
+		else
+			echo "The 'viewXVEnv' variable already exists in ~/.profile"
+		fi
+		source ~/.profile
 		# copy requirements file to the virtual environment
 		sudo cp $REQ $VENVREQ
 		# this is the way to execute a script from specified path

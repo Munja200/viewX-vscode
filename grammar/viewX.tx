@@ -33,7 +33,7 @@ StyleProperty[noskipws]:
 ;
 
 ClassView:
-    'view' name=ID 'as' shape=Shape (('child' 'of' parent_view=[ClassView]) | ( 'inside' container=Shape))? ('where' 'this' '=' conditional_parent=[ClassView] ('.' class_properties+=ID['.']))?
+    'view' name=ID 'as' shape=Shape (('child' 'of' parent_view=[ClassView] (show='show')?) | ( 'inside' container=Shape))? ('where' 'this' '=' conditional_parent=[ClassView] ('.' class_properties+=ID['.']))?
     ('{' properties+=ViewProperty '}')?
 ;
 

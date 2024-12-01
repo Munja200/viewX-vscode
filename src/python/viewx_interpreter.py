@@ -1,29 +1,30 @@
-"""
-Module which interprets textX model based on viewX model and generates preview.html file
-with Cytoscape.js graph model used for visualization of textX model. The preview.html file is hosted on file server
-and can be loaded with multiple clients (regular internet browser or Visual Studio Code extension) and previewed.
-The graph is interactive and it's visualization is based on Cytoscape.js graph engine.
-"""
-
 import sys
 from os.path import dirname, abspath, join
-from textx.metamodel import metamodel_from_file
-from textx.model import children_of_type
-from textx.exceptions import *
 import preview_generator
-import cytoscape_helper as cy
 import cytoscape_rule_engine as cre
+from textx.metamodel import metamodel_from_file
+from textx.model import get_children_of_type
+from textx.exceptions import *
+import cytoscape_helper as cy
 
+class Parent:
+    def __init__(self, id, name, show_childs):
+        self.id = id
+        self.name = name
+        self.show_childs = show_childs 
 
 class ViewXInterpreter(object):
     """
     ViewX model interpreter.
     """
+
     def __init__(self, view_model):
         self.view_model = view_model  # assign view model when initialized
         self.model = None  # different models can be interpreted with same view model
         self.elements = {}  # all Cytoscape.js graph elements
         self.styles = []  # style definitions for elements
+        self.layout = []
+        self.parents = []
         self.overwrite_styles = False  # overwrite styles flag
         self.traversed_types = []  # visited types during recursive search algorithm
         self.existing_parents = []  # used when multiple sources reference same element as inside
@@ -32,7 +33,7 @@ class ViewXInterpreter(object):
         # {type1 : {source1 : {dst1 : [(prop1, value1), (prop2, value2)]}, {dst2: [(prop3, value3)]} },
         #           {source2 : {dst3 : [(prop4, value4)]}, {dst4 : [(prop5, value5)} },
         #  type2 : {source3 : [{dst5: [(prop6, value6), (prop7, value7)]} },
-        #  ... 
+        #  ...
         # }
 
     def interpret(self, model):
@@ -45,14 +46,17 @@ class ViewXInterpreter(object):
         """
 
         self.model = model
-
+        if view_model.layout != None:
+            layout=cre.LayoutPropertyVisitor(view_model.layout)
+            if layout.layout != None: self.layout=layout.layout
+            self.layout.append("name: " +'\''+ view_model.layout.model.name+'\'')
         for view in view_model.views:
             # loop over model tx properties recursively and match them with defined views
             if not (type(view.shape) is str and view.shape.lower() == 'none'):
                 self.match_view_within_type(model, view)
 
-            self.overwrite_styles = True if view_model.stylesheet\
-                and view_model.stylesheet.overwrite == 'overwrite' else False
+            self.overwrite_styles = True if view_model.stylesheet \
+                                            and view_model.stylesheet.overwrite == 'overwrite' else False
             if not self.overwrite_styles:
                 # generate view styles
                 visitor = cre.ViewStylePropertyVisitor(view)
@@ -118,16 +122,18 @@ class ViewXInterpreter(object):
 
         :return: /
         """
-        children = children_of_type(view.name, tx_type)
+        children = get_children_of_type(view.name, tx_type)
         conditional_parent = view.__getattribute__('conditional_parent')
         if conditional_parent is None:
             for child in children:
                 self.elements.update(self.build_graph_element(child, view))
         # follow condition of defined parent properties
         else:
-            elements_of_type = children_of_type(conditional_parent.name, self.model)
+            elements_of_type = get_children_of_type(conditional_parent.name, self.model)
             for parent in elements_of_type:
+
                 for child in children:
+
                     if self.item_contains_property_by_structure(view.class_properties, parent, child):
                         self.elements.update(self.build_graph_element(child, view))
 
@@ -157,7 +163,7 @@ class ViewXInterpreter(object):
                 # when both start and end nodes are defined
                 if start_element is not None and end_element is not None:
                     graph_element = cy.Edge(start_element, end_element, cy.small_hash(item))
-        else: # element is node
+        else:  # element is node
             graph_element = cy.Node(cy.small_hash(item))
 
         # check item referencing properties (label, is_edge(connection points), parent...)
@@ -185,7 +191,7 @@ class ViewXInterpreter(object):
             # add property link classes as first property in each link
             for value_props in transformed_links.values():
                 value_props.append(('class', '{}-{}'.format(property_link.link_to.class_view.name.lower(),
-                                    '-'.join(property_link.link_to.class_properties))))
+                                                            '-'.join(property_link.link_to.class_properties))))
 
             # if property link label is defined
             for prop in property_link.properties:
@@ -208,7 +214,12 @@ class ViewXInterpreter(object):
         if hasattr(view, 'parent_view') and view.parent_view is not None:
             parent = self.find_view_parent_tx_type(item, view, self.model)
             if parent is not None:
-                graph_element.add_data('parent', cy.small_hash(parent))
+                value = cy.small_hash(parent)
+                graph_element.add_data('parent', value)
+                if not any(obj.id == value for obj in self.parents):
+                   self.parents.append(Parent(value,view.parent_view.name, True if view.show =="show" else False  )) 
+                if view.show == "show":
+                    graph_element.add_data('show', True)
 
         # if parent class view is defined
         if hasattr(view, 'container') and view.container:
@@ -306,7 +317,8 @@ class ViewXInterpreter(object):
                     if hasattr(item, class_prop):
                         result_property = item.__getattribute__(class_prop)
                         # if property found, take following class properties and pass them recursively
-                        if self.item_contains_property_by_structure(class_properties[1:], result_property, item_to_find):
+                        if self.item_contains_property_by_structure(class_properties[1:], result_property,
+                                                                    item_to_find):
                             return True
         else:
             # if single item, resolve property directly
@@ -344,7 +356,7 @@ class ViewXInterpreter(object):
                         # if property found, take following class properties and pass them recursively
                         properties = self.get_all_resolved_properties(class_properties[1:], result_property)
                         if properties.__class__.__name__ != 'list':
-                            properties = [properties]    
+                            properties = [properties]
                         resolved_properties.extend(properties)
         else:
             # if single item, resolve property directly
@@ -353,7 +365,7 @@ class ViewXInterpreter(object):
                     result_property = result_property.__getattribute__(class_prop)
                     properties = self.get_all_resolved_properties(class_properties[1:], result_property)
                     if properties.__class__.__name__ != 'list':
-                        properties = [properties]    
+                        properties = [properties]
                     resolved_properties.extend(properties)
 
         return resolved_properties
@@ -367,7 +379,7 @@ class ViewXInterpreter(object):
         :param view: view which holds defined parent textX type for tx_item
 
         :param tx_root_item: textX type instance from which to start search
-        
+
         :return: parent textX type instance of the tx_item
         """
 
@@ -494,7 +506,7 @@ def build_path_from_import(view_model, _import):
     """
 
     path = dirname(view_model)
-    _import = _import[1:-1] # remove ""
+    _import = _import[1:-1]  # remove ""
     if _import[0:2] == './':
         _import = _import[2:]
     subpaths = _import.split('/')
@@ -526,7 +538,7 @@ if __name__ == '__main__':
             # create textX metamodel path based on viewX model import
             metamodel_path = build_path_from_import(sys.argv[1], view_model.tx_import.path)
             model_path = sys.argv[2]
-            
+
             # get model name
             parts = model_path.split('/') if model_path.__contains__('/') else model_path.split('\\')
             model_name = parts[-1]

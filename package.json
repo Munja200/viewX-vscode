@@ -31,10 +31,10 @@
 		}
 	],
 	"engines": {
-		"vscode": "^1.12.0"
+		"vscode": "^1.95.0"
 	},
 	"categories": [
-		"Languages",
+		"Programming Languages",
 		"Other"
 	],
 	"keywords": [
@@ -46,8 +46,7 @@
 	],
 	"activationEvents": [
 		"onLanguage:viewX",
-		"workspaceContains:vxconfig.json",
-		"onCommand:viewx.initProject"
+		"workspaceContains:vxconfig.json"
 	],
 	"main": "./out/src/extension",
 	"contributes": {
@@ -249,14 +248,13 @@
 	"devDependencies": {
 		"@types/browser-sync": "^0.0.36",
 		"@types/express": "^4.0.37",
-		"@types/jest": "^29.5.14",
 		"@types/mocha": "^10.0.9",
 		"@types/node": "^8.10.66",
+		"@types/vscode": "^1.95.0",
 		"cpx": "^1.5.0",
 		"mocha": "^3.5.0",
 		"tslint": "^5.7.0",
-		"typescript": "^5.6.2",
-		"vscode": "^1.1.5"
+		"typescript": "^5.6.2"
 	},
 	"__metadata": {
 		"id": "6093629f-bf24-4018-b59f-c9b1ccf5511a",

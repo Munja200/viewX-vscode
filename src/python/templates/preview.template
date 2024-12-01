@@ -16,18 +16,36 @@
 
 <body>
     <div id="cy"></div>
+    <div id="cy2" style="width: 500px; height: 500px; border: 1px solid black;"></div>
+
     <script>
+        var parents =[{% for parent in parents %}
+        {% if not loop.first %}
+        ,{"name":"{{parent.name}}", "id": {{parent.id}}, "showChilds": "{{parent.show_childs}}"}
+        {% else %}
+        {"name":"{{parent.name}}", "id": {{parent.id}}, "showChilds": "{{parent.show_childs}}"}
+        {% endif %}
+        {% endfor %}
+        ];
+        var allElements =[
+                        {% for element in elements %}
+                        {% if not loop.first %}
+                        ,{{element.to_json()}}
+                        {% else %}
+                        {{element.to_json()}}
+                        {% endif %}
+                        {% endfor %}
+                    ];
         var cy = cytoscape({
             container: document.getElementById('cy'),
             elements: [
-                {% for element in elements %}
-                    {# workaround because join() filter splits each letter after applying to_json() function #}
-                    {% if not loop.first %}
-                    ,{{element.to_json()}}
-                    {% else %}
-                    {{element.to_json()}}
-                    {% endif %}
-                {% endfor %}
+            {% for element in elements %}
+            {% if not element.data.parent or element.data.show == true %}
+                {% if not loop.first %}, {% endif %}
+                {{ element.to_json() }}
+            {% endif %}
+        {% endfor %}
+
             ],
             style: [
             {% if not overwrite_styles %}
@@ -47,15 +65,83 @@
             {% endif %}
             ],
             layout: {
-                name: 'circle',
-                fit: true,
-                padding: 10,
-                avoidOverlap: true
+                {% if not layout %}
+                    name: 'circle',
+                    fit: true,
+                    padding: 10,
+                    avoidOverlap: true
+                {% else %}
+                {% for item in layout %}
+                {{ item }}{% if not loop.last %},
+                          {% endif %}
+                {% endfor %}
+                {% endif %}
+
             },
             // decrease zoom sensitivity
             wheelSensitivity: 0.2
         });
 		
+        parents.forEach(parent => {
+            if (parent.showChilds === "False") {
+              cy.style()
+                .selector(`#${parent.id}`)  
+                .style({
+                    'background-image': 'link-icon-free-vector.png',
+                    'background-fit': 'cover'
+                })
+                .update();
+            }
+          });
+
+          cy.on('tap', 'node', function(event) {
+            var node = event.target;
+            var nodeId = node.id();
+            var parent = parents.find(p => p.id == nodeId);
+        
+            if (parent) {
+                if (parent.showChilds === "False") {
+                    var childElements = allElements.filter(el => el.data.parent == nodeId);                   
+              
+                        cy2 = cytoscape({
+                            container: document.getElementById('cy2'), // Neka je drugi div za podgraf
+                            elements: childElements,
+                            style: [
+                            {% if not overwrite_styles %}
+                                {% for style in styles %}
+                                    {# workaround because join() filter splits each letter after applying to_json() function #}
+                                    {% if not loop.first %}
+                                    ,{{style.to_json()}}
+                                    {% else %}
+                                    {{style.to_json()}}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                            {# always append custom styles #}
+                            {% if view_model.stylesheet.style %}
+                                {% if not overwrite_styles %},{% endif %}
+                                {{view_model.stylesheet.style}}
+                            {% endif %}
+                            ],
+                            layout: {
+                                {% if not layout %}
+                                    name: 'circle',
+                                    fit: true,
+                                    padding: 10,
+                                    avoidOverlap: true
+                                {% else %}
+                                {% for item in layout %}
+                                {{ item }}{% if not loop.last %},
+                                          {% endif %}
+                                {% endfor %}
+                                {% endif %}
+                
+                            }
+                        });
+                    
+                }
+            }
+        });
 		// flag for Code editor on Windows platform (needed for rendering fixes)
 		// var codeOnWindows = window.clientInformation.platform == "Win32" && window.clientInformation.appVersion.indexOf(" Electron/") > -1;
         // disable rendering bugfix
